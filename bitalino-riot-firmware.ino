@@ -185,7 +185,6 @@ unsigned char SerialIndex = 0;
 boolean FlagSerial = FALSE;
 char StringBuffer[MAX_STRING];
 
-char auxiliar[MAX_STRING];
 
 // To get printf to work, we redirect STDOUT and the myWrite functions
 ssize_t myWrite(void *cookie, const char *buf, size_t n)
@@ -392,7 +391,7 @@ void setup() {
     // Prepare the OSC message structure   
     // Now we send all data at once in a single message with only floats
     sprintf(StringBuffer, "/%u/raw\0",ModuleID);
-    PrepareOSC(&RawSensors, StringBuffer, 'f', 22);    // All float
+    PrepareOSC(&RawSensors, StringBuffer, 'f', 23);    // All float
     
   } // END OF IF NORMAL (!CONFIG) MODE
 
@@ -705,6 +704,15 @@ void loop() {
       char *pData = RawSensors.pData;
      
       float TempFloat;
+      
+      TempFloat = (float)millis();
+      FloatToBigEndian(pData, &TempFloat);
+      pData += sizeof(float);
+      
+      if(logging == true){
+        Serial1.print(TempFloat); Serial1.print(",");
+      }
+      
       FloatToBigEndian(pData, &a_x);
       pData += sizeof(float);
       FloatToBigEndian(pData, &a_y);
@@ -739,11 +747,10 @@ void loop() {
       FloatToBigEndian(pData, &TempFloat);
       pData += sizeof(float);
       
-      if(logging == true){
-        Serial1.print(millis()); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", TempFloat);
-        Serial1.print(auxiliar); Serial1.print(",");
-      }
+      //if(logging == true){
+        // Serial1.print(millis()); Serial1.print(",");
+        // Serial1.print(TempFloat); Serial1.print(",");
+      //}
       
       TempFloat = (float)ActualSwitchState;
       FloatToBigEndian(pData, &TempFloat);
@@ -781,44 +788,27 @@ void loop() {
       FloatToBigEndian(pData, &heading);
       
       if(logging == true){
-        sprintf(auxiliar, "%.2f", q1);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", q2);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", q3);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", q4);
-        Serial1.print(auxiliar); Serial1.print(",");
+//      Serial1.print(q1); Serial1.print(",");
+//      Serial1.print(q2); Serial1.print(",");
+//      Serial1.print(q3); Serial1.print(",");
+//      Serial1.print(q4); Serial1.print(",");
       
-        sprintf(auxiliar, "%.2f", yaw);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", pitch);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", roll);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", heading);
-        Serial1.print(auxiliar); Serial1.print(",");
+      Serial1.print(yaw); Serial1.print(",");
+      Serial1.print(pitch); Serial1.print(",");
+      Serial1.print(roll); Serial1.print(",");
+      Serial1.print(heading); Serial1.print(",");
         
-        sprintf(auxiliar, "%.2f", a_x);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", a_y);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", a_z);
-        Serial1.print(auxiliar); Serial1.print(",");
-        
-        sprintf(auxiliar, "%.2f", g_x_scaled);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", g_y_scaled);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", g_z_scaled);
-        Serial1.print(auxiliar); Serial1.print(",");
-        
-        sprintf(auxiliar, "%.2f", m_x);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", m_y);
-        Serial1.print(auxiliar); Serial1.print(",");
-        sprintf(auxiliar, "%.2f", m_z);
-        Serial1.println(auxiliar);
+      Serial1.print(a_x); Serial1.print(",");
+      Serial1.print(a_y); Serial1.print(",");
+      Serial1.print(a_z); Serial1.print(",");
+      
+      Serial1.print(g_x_scaled); Serial1.print(",");
+      Serial1.print(g_y_scaled); Serial1.print(",");
+      Serial1.print(g_z_scaled); Serial1.print(",");
+      
+      Serial1.print(m_x); Serial1.print(",");
+      Serial1.print(m_y); Serial1.print(",");
+      Serial1.println(m_z);
       }
       
       UdpPacket.write((uint8_t*)RawSensors.buf, RawSensors.PacketSize);
